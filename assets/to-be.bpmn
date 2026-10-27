@@ -1,0 +1,146 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Defs_to-be" targetNamespace="https://example.org/consultation-concept">
+  <bpmn:process id="Process_to-be" name="TO-BE: самостоятельная запись на 20 минут" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_to-be">
+      <bpmn:lane id="Lane_to-be_student" name="Студент">
+        <bpmn:flowNodeRef>q_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>q_choose</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>q_reject</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>q_failed</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_to-be_system" name="ИС">
+        <bpmn:flowNodeRef>q_book</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>q_available</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>q_confirm</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>q_end</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="q_start" name="Получено приглашение">
+      <bpmn:outgoing>qf1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="q_choose" name="Выбрать слот">
+      <bpmn:incoming>qf1</bpmn:incoming>
+      <bpmn:outgoing>qf2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="q_book" name="Проверить и занять слот">
+      <bpmn:incoming>qf2</bpmn:incoming>
+      <bpmn:outgoing>qf3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="q_available" name="Запись создана?" default="qf5">
+      <bpmn:incoming>qf3</bpmn:incoming>
+      <bpmn:outgoing>qf4</bpmn:outgoing>
+      <bpmn:outgoing>qf5</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="q_confirm" name="Подтвердить запись">
+      <bpmn:incoming>qf4</bpmn:incoming>
+      <bpmn:outgoing>qf6</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="q_end" name="Время закреплено">
+      <bpmn:incoming>qf6</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="q_reject" name="Прочитать причину">
+      <bpmn:incoming>qf5</bpmn:incoming>
+      <bpmn:outgoing>qf7</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="q_failed" name="Запись не создана">
+      <bpmn:incoming>qf7</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="qf1" sourceRef="q_start" targetRef="q_choose"/>
+    <bpmn:sequenceFlow id="qf2" sourceRef="q_choose" targetRef="q_book"/>
+    <bpmn:sequenceFlow id="qf3" sourceRef="q_book" targetRef="q_available"/>
+    <bpmn:sequenceFlow id="qf4" sourceRef="q_available" targetRef="q_confirm" name="Да">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">validBooking</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="qf5" sourceRef="q_available" targetRef="q_reject" name="Нет"/>
+    <bpmn:sequenceFlow id="qf6" sourceRef="q_confirm" targetRef="q_end"/>
+    <bpmn:sequenceFlow id="qf7" sourceRef="q_reject" targetRef="q_failed"/>
+  </bpmn:process>
+  <bpmn:collaboration id="Collab_to-be">
+    <bpmn:participant id="Pool_to-be" name="TO-BE: самостоятельная запись на 20 минут" processRef="Process_to-be"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="Diagram_to-be">
+    <bpmndi:BPMNPlane id="Plane_to-be" bpmnElement="Collab_to-be">
+      <bpmndi:BPMNShape id="Pool_to-be_di" bpmnElement="Pool_to-be" isHorizontal="true">
+        <dc:Bounds x="30" y="80" width="1190" height="460"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_to-be_student_di" bpmnElement="Lane_to-be_student" isHorizontal="true">
+        <dc:Bounds x="60" y="80" width="1160" height="230"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_to-be_system_di" bpmnElement="Lane_to-be_system" isHorizontal="true">
+        <dc:Bounds x="60" y="310" width="1160" height="230"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="q_start_di" bpmnElement="q_start">
+        <dc:Bounds x="110" y="145" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100" y="189" width="100" height="55"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="q_choose_di" bpmnElement="q_choose">
+        <dc:Bounds x="210" y="125" width="130" height="96"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="q_book_di" bpmnElement="q_book">
+        <dc:Bounds x="430" y="365" width="130" height="96"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="q_available_di" bpmnElement="q_available" isMarkerVisible="true">
+        <dc:Bounds x="630" y="380" width="50" height="50"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="595.0" y="438" width="120" height="55"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="q_confirm_di" bpmnElement="q_confirm">
+        <dc:Bounds x="800" y="365" width="130" height="96"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="q_end_di" bpmnElement="q_end">
+        <dc:Bounds x="1050" y="387" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1008.0" y="431" width="120" height="55"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="q_reject_di" bpmnElement="q_reject">
+        <dc:Bounds x="800" y="125" width="130" height="96"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="q_failed_di" bpmnElement="q_failed">
+        <dc:Bounds x="1050" y="143" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1008.0" y="187" width="120" height="55"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="qf1_di" bpmnElement="qf1">
+        <di:waypoint x="146" y="163"/>
+        <di:waypoint x="210" y="163"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="qf2_di" bpmnElement="qf2">
+        <di:waypoint x="275" y="221"/>
+        <di:waypoint x="275" y="401"/>
+        <di:waypoint x="430" y="401"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="qf3_di" bpmnElement="qf3">
+        <di:waypoint x="560" y="401"/>
+        <di:waypoint x="630" y="405"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="qf4_di" bpmnElement="qf4">
+        <di:waypoint x="680" y="405"/>
+        <di:waypoint x="800" y="405"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="705.0" y="383.0" width="70" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="qf5_di" bpmnElement="qf5">
+        <di:waypoint x="655" y="380"/>
+        <di:waypoint x="655" y="163"/>
+        <di:waypoint x="800" y="163"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="620.0" y="249.5" width="70" height="18"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="qf6_di" bpmnElement="qf6">
+        <di:waypoint x="930" y="405"/>
+        <di:waypoint x="1050" y="405"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="qf7_di" bpmnElement="qf7">
+        <di:waypoint x="930" y="163"/>
+        <di:waypoint x="1050" y="161"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

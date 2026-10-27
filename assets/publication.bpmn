@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Defs_publication" targetNamespace="https://example.org/consultation-concept">
+  <bpmn:process id="Process_publication" name="TO-BE: очередь и приглашение группы" isExecutable="false">
+    <bpmn:laneSet id="LaneSet_publication">
+      <bpmn:lane id="Lane_publication_teacher" name="Преподаватель">
+        <bpmn:flowNodeRef>p_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>p_details</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>p_invite</bpmn:flowNodeRef>
+      </bpmn:lane>
+      <bpmn:lane id="Lane_publication_system" name="ИС">
+        <bpmn:flowNodeRef>p_slots</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>p_deliver</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>p_end</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="p_start" name="Назначен приём">
+      <bpmn:outgoing>pf1</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="p_details" name="Задать очередь и группу">
+      <bpmn:incoming>pf1</bpmn:incoming>
+      <bpmn:outgoing>pf2</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="p_slots" name="Создать слоты">
+      <bpmn:incoming>pf2</bpmn:incoming>
+      <bpmn:outgoing>pf3</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="p_invite" name="Отправить приглашение">
+      <bpmn:incoming>pf3</bpmn:incoming>
+      <bpmn:outgoing>pf4</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="p_deliver" name="Доставить группе">
+      <bpmn:incoming>pf4</bpmn:incoming>
+      <bpmn:outgoing>pf5</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="p_end" name="Приглашение отправлено">
+      <bpmn:incoming>pf5</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="pf1" sourceRef="p_start" targetRef="p_details"/>
+    <bpmn:sequenceFlow id="pf2" sourceRef="p_details" targetRef="p_slots"/>
+    <bpmn:sequenceFlow id="pf3" sourceRef="p_slots" targetRef="p_invite"/>
+    <bpmn:sequenceFlow id="pf4" sourceRef="p_invite" targetRef="p_deliver"/>
+    <bpmn:sequenceFlow id="pf5" sourceRef="p_deliver" targetRef="p_end"/>
+  </bpmn:process>
+  <bpmn:collaboration id="Collab_publication">
+    <bpmn:participant id="Pool_publication" name="TO-BE: очередь и приглашение группы" processRef="Process_publication"/>
+  </bpmn:collaboration>
+  <bpmndi:BPMNDiagram id="Diagram_publication">
+    <bpmndi:BPMNPlane id="Plane_publication" bpmnElement="Collab_publication">
+      <bpmndi:BPMNShape id="Pool_publication_di" bpmnElement="Pool_publication" isHorizontal="true">
+        <dc:Bounds x="30" y="80" width="1210" height="470"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_publication_teacher_di" bpmnElement="Lane_publication_teacher" isHorizontal="true">
+        <dc:Bounds x="60" y="80" width="1180" height="250"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_publication_system_di" bpmnElement="Lane_publication_system" isHorizontal="true">
+        <dc:Bounds x="60" y="330" width="1180" height="220"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_start_di" bpmnElement="p_start">
+        <dc:Bounds x="110" y="155" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="100" y="199" width="100" height="55"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_details_di" bpmnElement="p_details">
+        <dc:Bounds x="210" y="135" width="130" height="96"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_slots_di" bpmnElement="p_slots">
+        <dc:Bounds x="430" y="385" width="130" height="96"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_invite_di" bpmnElement="p_invite">
+        <dc:Bounds x="650" y="135" width="130" height="96"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_deliver_di" bpmnElement="p_deliver">
+        <dc:Bounds x="870" y="385" width="130" height="96"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="p_end_di" bpmnElement="p_end">
+        <dc:Bounds x="1090" y="403" width="36" height="36"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1048.0" y="447" width="120" height="55"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="pf1_di" bpmnElement="pf1">
+        <di:waypoint x="146" y="173"/>
+        <di:waypoint x="210" y="173"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="pf2_di" bpmnElement="pf2">
+        <di:waypoint x="275" y="231"/>
+        <di:waypoint x="275" y="421"/>
+        <di:waypoint x="430" y="421"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="pf3_di" bpmnElement="pf3">
+        <di:waypoint x="560" y="421"/>
+        <di:waypoint x="715" y="421"/>
+        <di:waypoint x="715" y="231"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="pf4_di" bpmnElement="pf4">
+        <di:waypoint x="780" y="173"/>
+        <di:waypoint x="815" y="173"/>
+        <di:waypoint x="815" y="421"/>
+        <di:waypoint x="870" y="421"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="pf5_di" bpmnElement="pf5">
+        <di:waypoint x="1000" y="421"/>
+        <di:waypoint x="1090" y="421"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
