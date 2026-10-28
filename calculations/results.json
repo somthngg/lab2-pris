@@ -94,6 +94,60 @@
       "winner": "C"
     }
   ],
+  "score_sensitivity": [
+    {
+      "id": "equal_usability",
+      "label": "Удобство C равно B: K2 = 4",
+      "overrides": {
+        "C": {
+          "K2": 4
+        }
+      },
+      "scores": {
+        "A": 2.95,
+        "B": 4.1,
+        "C": 4.2
+      },
+      "winners": [
+        "C"
+      ]
+    },
+    {
+      "id": "equal_maintenance",
+      "label": "Сопровождение C равно B: K3 = 3",
+      "overrides": {
+        "C": {
+          "K3": 3
+        }
+      },
+      "scores": {
+        "A": 2.95,
+        "B": 4.1,
+        "C": 4.25
+      },
+      "winners": [
+        "C"
+      ]
+    },
+    {
+      "id": "equal_both",
+      "label": "Оба преимущества C не подтвердились: K2 = 4, K3 = 3",
+      "overrides": {
+        "C": {
+          "K2": 4,
+          "K3": 3
+        }
+      },
+      "scores": {
+        "A": 2.95,
+        "B": 4.1,
+        "C": 4.0
+      },
+      "winners": [
+        "B"
+      ]
+    }
+  ],
   "effect_scenarios": [
     {
       "bookings": 960.0,
