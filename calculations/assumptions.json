@@ -41,7 +41,7 @@
       },
       "annual_support_hours": 48,
       "organisation_minutes_after": 0.5,
-      "launch_weeks": 10,
+      "launch_weeks": 12,
       "eligible": true
     },
     "C": {
@@ -100,7 +100,7 @@
       4,
       3,
       4,
-      4
+      3
     ],
     "C": [
       5,
