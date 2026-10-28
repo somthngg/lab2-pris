@@ -1,139 +1,114 @@
 {
-  "annual_bookings": 2400,
+  "it_hour_cost": 500.0,
+  "weekly_bookings": 60,
+  "pilot_bookings": 240,
+  "annual_bookings": 1920,
   "variants": {
     "A": {
-      "hours": 12,
-      "person_months": 0.075,
-      "direct": 9600.0,
-      "reserve": 960.0,
-      "creation": 10560.0,
-      "annual": 3200.0,
-      "tco": 20160.0,
-      "saved_hours": 20.0,
-      "effect": 12000.0,
-      "net": 8800.0,
-      "payback": 1.2,
-      "roi": 78.57142857142857,
-      "score": 3.1,
+      "hours": 16,
+      "direct": 8000.0,
+      "reserve": 800.0,
+      "creation": 8800.0,
+      "support_hours": 8,
+      "annual_cost": 4000.0,
+      "tco": 20800.0,
+      "annual_saved_hours": 16.0,
+      "pilot_saved_hours": 2.0,
+      "score": 2.95,
       "eligible": false
     },
     "B": {
-      "hours": 48,
-      "person_months": 0.3,
-      "direct": 38400.0,
-      "reserve": 3840.0,
-      "creation": 42240.0,
-      "annual": 16800.0,
-      "tco": 92640.0,
-      "saved_hours": 60.0,
-      "effect": 36000.0,
-      "net": 19200.0,
-      "payback": 2.2,
-      "roi": 16.580310880829014,
-      "score": 4.0,
+      "hours": 200,
+      "direct": 100000.0,
+      "reserve": 10000.0,
+      "creation": 110000.0,
+      "support_hours": 48,
+      "annual_cost": 24000.0,
+      "tco": 182000.0,
+      "annual_saved_hours": 32.0,
+      "pilot_saved_hours": 4.0,
+      "score": 4.1,
       "eligible": true
     },
     "C": {
-      "hours": 160,
-      "person_months": 1.0,
-      "direct": 128000.0,
-      "reserve": 12800.0,
-      "creation": 140800.0,
-      "annual": 26400.0,
-      "tco": 220000.0,
-      "saved_hours": 60.0,
-      "effect": 36000.0,
-      "net": 9600.0,
-      "payback": 14.666666666666666,
-      "roi": -50.90909090909091,
-      "score": 3.8,
+      "hours": 240,
+      "direct": 120000.0,
+      "reserve": 12000.0,
+      "creation": 132000.0,
+      "support_hours": 36,
+      "annual_cost": 18000.0,
+      "tco": 186000.0,
+      "annual_saved_hours": 32.0,
+      "pilot_saved_hours": 4.0,
+      "score": 4.45,
       "eligible": true
     }
   },
   "sensitivity": [
     {
-      "main_weight": 0.2,
-      "weights": [
-        0.2,
-        0.21333333333333335,
-        0.16,
-        0.16,
-        0.10666666666666667,
-        0.05333333333333334,
-        0.05333333333333334,
-        0.05333333333333334
-      ],
-      "scores": {
-        "A": 3.1733333333333333,
-        "B": 4.0,
-        "C": 3.72
-      },
-      "winner": "B"
-    },
-    {
       "main_weight": 0.25,
       "weights": [
         0.25,
-        0.2,
-        0.15,
-        0.15,
-        0.1,
-        0.05,
-        0.05,
-        0.05
+        0.26785714285714285,
+        0.21428571428571427,
+        0.16071428571428573,
+        0.10714285714285714
       ],
       "scores": {
-        "A": 3.1,
-        "B": 4.0,
-        "C": 3.8
+        "A": 3.017857142857143,
+        "B": 4.035714285714286,
+        "C": 4.410714285714286
       },
-      "winner": "B"
+      "winner": "C"
     },
     {
       "main_weight": 0.3,
       "weights": [
         0.3,
-        0.18666666666666668,
-        0.14,
-        0.14,
-        0.09333333333333334,
-        0.04666666666666667,
-        0.04666666666666667,
-        0.04666666666666667
+        0.25,
+        0.2,
+        0.15,
+        0.1
       ],
       "scores": {
-        "A": 3.026666666666667,
-        "B": 4.0,
-        "C": 3.88
+        "A": 2.95,
+        "B": 4.1,
+        "C": 4.45
       },
-      "winner": "B"
-    }
-  ],
-  "scenarios": [
-    {
-      "factor": 0.7,
-      "bookings": 1680.0,
-      "effect": 25200.0,
-      "net": 8400.0,
-      "roi": -18.39378238341969,
-      "payback": 5.0285714285714285
+      "winner": "C"
     },
     {
-      "factor": 1.0,
-      "bookings": 2400.0,
-      "effect": 36000.0,
-      "net": 19200.0,
-      "roi": 16.580310880829014,
-      "payback": 2.2
-    },
-    {
-      "factor": 1.3,
-      "bookings": 3120.0,
-      "effect": 46800.0,
-      "net": 30000.0,
-      "roi": 51.55440414507772,
-      "payback": 1.408
+      "main_weight": 0.35,
+      "weights": [
+        0.35,
+        0.23214285714285715,
+        0.18571428571428572,
+        0.1392857142857143,
+        0.09285714285714286
+      ],
+      "scores": {
+        "A": 2.882142857142857,
+        "B": 4.164285714285715,
+        "C": 4.489285714285714
+      },
+      "winner": "C"
     }
   ],
-  "breakeven_bookings": 2058.6666666666665
+  "effect_scenarios": [
+    {
+      "bookings": 960.0,
+      "saved_hours": 16.0
+    },
+    {
+      "bookings": 1920.0,
+      "saved_hours": 32.0
+    },
+    {
+      "bookings": 2880.0,
+      "saved_hours": 48.0
+    }
+  ],
+  "roi": null,
+  "payback": null,
+  "financial_effect_note": "Денежный эффект не оценивается; ROI и срок окупаемости не определяются в принятой модели"
 }

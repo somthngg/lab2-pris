@@ -1,85 +1,90 @@
-"""Пересчёт оценок и экономики: python calculate.py. Внешние пакеты не нужны."""
+"""Пересчёт затрат, взвешенных оценок и экономии часов. python calculate.py."""
 import json
 from pathlib import Path
-from decimal import Decimal, ROUND_HALF_UP, ROUND_CEILING
-BASE=Path(__file__).resolve().parent
-def dec(x):return Decimal(str(x))
-def fmt(x,n=2):
-    if x is None:return 'не окупается'
-    return f'{dec(x).quantize(Decimal(1).scaleb(-n),rounding=ROUND_HALF_UP):,.{n}f}'.replace(',',' ').replace('.',',')
-def calculate(d):
-    count=d['ordinary_months']*d['bookings_per_ordinary_month']+d['peak_months']*d['bookings_per_peak_month']
-    weights=[dec(c['weight']) for c in d['criteria']]
-    assert sum(weights)==1
-    variants={}
-    for key,v in d['variants'].items():
-        hours=sum(v['hours'].values());direct=dec(hours)*d['project_hour_cost']
-        reserve=direct*dec(d['reserve_rate']);creation=direct+reserve
-        annual=sum(dec(c) for c in v['annual_costs'].values())
-        saved=dec(count)*(dec(d['baseline_organisation_minutes'])-dec(v['residual_minutes']))/60
-        effect=saved*d['teacher_hour_cost'];tco=creation+d['horizon_years']*annual;net=effect-annual
-        score=sum(w*dec(s) for w,s in zip(weights,d['scores'][key]))
-        variants[key]=dict(hours=hours,person_months=dec(hours)/d['hours_per_person_month'],direct=direct,
-            reserve=reserve,creation=creation,annual=annual,tco=tco,saved_hours=saved,effect=effect,net=net,
-            payback=creation/net if net>0 else None,roi=(d['horizon_years']*effect-tco)/tco*100,
-            score=score,eligible=v['eligible'])
-    sensitivity=[];main=max(range(len(weights)),key=lambda i:weights[i])
-    for delta in [dec('-.05'),dec('0'),dec('.05')]:
-        changed=weights[main]+delta
-        w=[changed if j==main else old*(1-changed)/(1-weights[main]) for j,old in enumerate(weights)]
-        assert abs(sum(w)-1)<dec('1e-20')
-        scores={k:sum(x*dec(y) for x,y in zip(w,d['scores'][k])) for k in variants}
-        winner=max((k for k in variants if variants[k]['eligible']),key=lambda k:scores[k])
-        sensitivity.append(dict(main_weight=changed,weights=w,scores=scores,winner=winner))
-    b=variants['B'];scenarios=[]
-    for factor in [dec('.7'),dec('1'),dec('1.3')]:
-        effect=b['effect']*factor;net=effect-b['annual']
-        scenarios.append(dict(factor=factor,bookings=dec(count)*factor,effect=effect,net=net,
-             roi=(d['horizon_years']*effect-b['tco'])/b['tco']*100,payback=b['creation']/net if net>0 else None))
-    per_record=(dec(d['baseline_organisation_minutes'])-dec(d['variants']['B']['residual_minutes']))/60*d['teacher_hour_cost']
-    threshold=(b['creation']/d['horizon_years']+b['annual'])/per_record if per_record>0 else None
-    return dict(annual_bookings=count,variants=variants,sensitivity=sensitivity,scenarios=scenarios,breakeven_bookings=threshold)
-def render(d,r):
-    lines=['# Расчёты концепции ИС записи на консультации','',
-      'Горизонт оценки - 3 года. Нагрузка является расчётным примером, а не ограничением числа пользователей или срока работы системы. Ставки труда и расходы размещения приняты для сметы.', '',
-      '## Нагрузка и ставки','',
-      f"Записи за год: {d['ordinary_months']} × {d['bookings_per_ordinary_month']} + {d['peak_months']} × {d['bookings_per_peak_month']} = {r['annual_bookings']}.",
-      f"Организационное время преподавателя до изменений: {d['baseline_organisation_minutes']} мин на запись; стоимость часа: {d['teacher_hour_cost']} руб. Проектная работа: {d['project_hour_cost']} руб./ч.",
-      'Время самой консультации (20 минут) не включается в экономию. Прямого уменьшения зарплатных выплат модель не предполагает.', '',
-      '## Сводные результаты','', '| Показатель | A | B | C |','|---|---:|---:|---:|']
-    rows=[('Трудоёмкость, ч','hours'),('Чел.-мес. при 160 ч','person_months'),('Работы, руб.','direct'),
-      ('Резерв 10%, руб.','reserve'),('Первоначальные затраты, руб.','creation'),('Эксплуатация, руб./год','annual'),
-      ('TCO за 3 года, руб.','tco'),('Высвобождение времени, ч/год','saved_hours'),
-      ('Стоимость высвобождённого времени, руб./год','effect'),('Чистый условный эффект, руб./год','net'),
-      ('Условный ROI за 3 года, %','roi'),('Условная окупаемость, лет','payback'),('Взвешенный балл','score')]
-    for title,key in rows:lines.append('| '+title+' | '+' | '.join(fmt(r['variants'][v][key]) for v in 'ABC')+' |')
-    lines+=['','Лицензионные платежи в вариантах равны нулю. Первоначальные затраты = часы × ставка × 1,10. TCO = первоначальные затраты + 3 × эксплуатация.',
-       'E = число записей × сокращение организационного времени / 60 × стоимость часа. ROI = (3 × E - TCO) / TCO × 100%. Окупаемость = первоначальные затраты / (E - эксплуатация), если знаменатель положителен.',
-       'Это оценка полезной трудовой мощности. При сохранении зарплат денежная окупаемость не подтверждается. A исключён из выбора по обязательным требованиям, его экономика приведена для сравнения.', '',
-       '## Состав затрат','']
-    for k,v in d['variants'].items():
-        lines += [f'### {k}. {v["name"]}','','| Работа | Часы |','|---|---:|']
-        lines += [f'| {name} | {h} |' for name,h in v['hours'].items()]
-        lines += ['', '| Ежегодная статья | Руб./год |','|---|---:|']
-        lines += [f'| {name} | {fmt(value)} |' for name,value in v['annual_costs'].items()];lines += ['']
-    lines += ['## Оценки вариантов','','| Критерий | Вес | A, справочно | B | C |','|---|---:|---:|---:|---:|']
-    for i,c in enumerate(d['criteria']):lines.append(f'| {c["id"]}. {c["name"]} | {fmt(c["weight"])} | '+' | '.join(str(d['scores'][v][i]) for v in 'ABC')+' |')
-    lines += ['','## Устойчивость','','| Вес K1 | A, справочно | B | C | Лидер |','|---|---:|---:|---:|---|']
-    for s in r['sensitivity']:lines.append('| '+fmt(s['main_weight'])+' | '+' | '.join(fmt(s['scores'][v],4) for v in 'ABC')+' | '+s['winner']+' |')
-    lines += ['', 'Остальные веса перенормированы пропорционально: w′j = wj × (1 - w′1)/(1 - w1).', '',
-      '## Чувствительность экономики B','','| Нагрузка | Записей/год | E, руб./год | Чистый эффект, руб./год | ROI, % | Окупаемость, лет |','|---|---:|---:|---:|---:|---:|']
-    for s in r['scenarios']:lines.append('| '+fmt(s['factor']*100,0)+'% | '+fmt(s['bookings'],0)+' | '+fmt(s['effect'])+' | '+fmt(s['net'])+' | '+fmt(s['roi'])+' | '+fmt(s['payback'])+' |')
-    threshold_text=(f"Порог трёхлетней условной окупаемости: {fmt(r['breakeven_bookings'])}, то есть не менее {r['breakeven_bookings'].to_integral_value(rounding=ROUND_CEILING)} записей в год при неизменных расходах и экономии времени."
-                    if r['breakeven_bookings'] is not None else 'При отсутствии положительной экономии времени порог окупаемости по этой модели не достигается.')
-    lines += ['',threshold_text,
-      'Расходы оставлены постоянными в пределах одного стенда и расчётной нагрузки. Расширение инфраструктуры оценивается отдельно.', '',
-      '## Условный накопленный результат B','','| Момент | Расходы, руб. | Стоимость времени, руб. | Накопленный результат, руб. |','|---|---:|---:|---:|',
-      f"| Запуск | {fmt(r['variants']['B']['creation'])} | 0,00 | {fmt(-r['variants']['B']['creation'])} |"]
-    for year in range(1,4):
-        b=r['variants']['B'];lines.append(f'| Год {year} | {fmt(b["annual"])} | {fmt(b["effect"])} | {fmt(-b["creation"]+year*b["net"])} |')
-    return '\n'.join(lines)+'\n'
-if __name__=='__main__':
-    data=json.loads((BASE/'assumptions.json').read_text(encoding='utf-8'));result=calculate(data)
+from decimal import Decimal, ROUND_HALF_UP
+BASE = Path(__file__).resolve().parent
+D = lambda value: Decimal(str(value))
+
+def fmt(value, digits=2):
+    return f'{D(value).quantize(D(1).scaleb(-digits), rounding=ROUND_HALF_UP):,.{digits}f}'.replace(',', ' ').replace('.', ',')
+
+def calculate(data):
+    rate = D(data['it_monthly_reference_rub']) / data['it_month_hours']
+    weekly = data['scenario_subjects'] * data['defenses_per_subject_week']
+    annual = weekly * data['teaching_weeks_per_year']
+    pilot = weekly * data['pilot_weeks']
+    weights = [D(c['weight']) for c in data['criteria']]
+    assert sum(weights) == 1
+    variants = {}
+    for key, item in data['variants'].items():
+        hours = sum(item['hours'].values())
+        direct = D(hours) * rate
+        reserve = direct * D(data['reserve_rate'])
+        support = D(item['annual_support_hours']) * rate
+        delta = D(data['organisation_minutes_before']) - D(item['organisation_minutes_after'])
+        variants[key] = dict(hours=hours, direct=direct, reserve=reserve, creation=direct+reserve,
+            support_hours=item['annual_support_hours'], annual_cost=support,
+            tco=direct+reserve+data['horizon_years']*support,
+            annual_saved_hours=D(annual)*delta/60, pilot_saved_hours=D(pilot)*delta/60,
+            score=sum(w*D(s) for w,s in zip(weights,data['scores'][key])), eligible=item['eligible'])
+    sensitivity = []
+    main = max(range(len(weights)),key=lambda i:weights[i])
+    for delta in (D('-.05'),D('0'),D('.05')):
+        changed = weights[main]+delta
+        updated = [changed if i==main else w*(1-changed)/(1-weights[main]) for i,w in enumerate(weights)]
+        assert abs(sum(updated)-1) < D('1e-20')
+        scores = {k:sum(w*D(s) for w,s in zip(updated,data['scores'][k])) for k in variants}
+        winner = max((k for k in variants if variants[k]['eligible']),key=lambda k:scores[k])
+        sensitivity.append(dict(main_weight=changed, weights=updated, scores=scores, winner=winner))
+    delta = D(data['organisation_minutes_before'])-D(data['variants']['C']['organisation_minutes_after'])
+    scenarios = [dict(bookings=D(annual)*factor,saved_hours=D(annual)*factor*delta/60)
+        for factor in (D('.5'),D('1'),D('1.5'))]
+    return dict(it_hour_cost=rate, weekly_bookings=weekly, pilot_bookings=pilot, annual_bookings=annual,
+        variants=variants, sensitivity=sensitivity, effect_scenarios=scenarios,
+        roi=None, payback=None, financial_effect_note=data['financial_effect_note'])
+
+def render(data, result):
+    lines = ['# Расчёты концепции записи на защиту лабораторных','',
+      'Часы, нагрузка и организационные минуты являются учебными оценками, а не результатами измерений. Смета отражает стоимость занятости ИТ-сотрудника. Дополнительных платежей за предоставленные вузом сервер и почту нет.','',
+      '## Основание оценки труда ИТ-отдела','',
+      'Условный месячный ориентир — 80 000 руб., расчётный месяц — 160 ч. В смете: 80 000 / 160 = 500 руб./ч.',
+      f"Ориентир: [подборка вакансий Центра карьеры ИТМО]({data['cost_reference_url']}), содержащая предложение веб-разработчику от 80 тыс. руб./месяц. Это не зарплата конкретного сотрудника университета. Норма 160 ч и применение ориентира ко всем этапам — допущения. Полный фонд оплаты труда с начислениями не рассчитывается.",
+      'Стоимость времени преподавателя и практиканта не задаётся. Экономия их времени в рубли не переводится.','',
+      '## Затраты вариантов','', '| Показатель | A | B | C |','|---|---:|---:|---:|']
+    for label,key in [('Работы, ч','hours'),('Работы, руб.','direct'),('Резерв, руб.','reserve'),('Запуск с резервом, руб.','creation'),('Поддержка, ч/год','support_hours'),('Поддержка, руб./год','annual_cost'),('TCO за 3 года, руб.','tco')]:
+        lines.append('| '+label+' | '+' | '.join(fmt(result['variants'][k][key],0) for k in 'ABC')+' |')
+    lines += ['', 'Запуск = часы работ × 500 × 1,10. Поддержка = часы поддержки × 500. TCO = запуск + 3 × поддержка.','',
+      '## Состав трудоёмкости','']
+    for key,item in data['variants'].items():
+        lines += [f'### {key}. {item["name"]}','','| Работа | Часы |','|---|---:|']
+        lines += [f'| {name} | {hours} |' for name,hours in item['hours'].items()]
+        lines += ['',f"Поддержка: {item['annual_support_hours']} ч/год; до начала использования: {item['launch_weeks']} недель.",'']
+    lines += ['Поддержка B оценена выше C из-за связи с обновлениями портала. Это плановая гипотеза, а не результат обследования конкретного кода.','',
+      '## Взвешенные оценки','', '| Критерий | Вес | A, справочно | B | C |','|---|---:|---:|---:|---:|']
+    for i,c in enumerate(data['criteria']):
+        lines.append(f'| {c["id"]}. {c["name"]} | {fmt(c["weight"])} | '+' | '.join(str(data['scores'][k][i]) for k in 'ABC')+' |')
+    lines += ['| Итог | 1,00 | '+' | '.join(fmt(result['variants'][k]['score']) for k in 'ABC')+' |','',
+      'A исключён по обязательным требованиям; баллы B/C — экспертная оценка концепций, а не испытанных интерфейсов.','',
+      '| Вес K1 | B | C | Лидер |','|---|---:|---:|---|']
+    for row in result['sensitivity']:
+        lines.append('| '+fmt(row['main_weight'])+' | '+fmt(row['scores']['B'],3)+' | '+fmt(row['scores']['C'],3)+' | '+row['winner']+' |')
+    lines += ['', 'Остальные веса перенормированы пропорционально с сохранением суммы 1.','',
+      '## Эффект в часах','',
+      f"Пример: 3 предмета × 20 защит/неделю × 32 учебные недели = {result['annual_bookings']} защит в год. За четыре недели при той же нагрузке — {result['pilot_bookings']} защит. Это сценарий расчёта, а не квота системы.",
+      'Пилот включает 1–3 предмета. Исходное организационное время — 1,5 минуты на запись; после внедрения B/C — 0,5 минуты. Это гипотезы для хронометража. Сами 10 минут защиты не включаются в экономию.','',
+      '| Вариант | После, мин/запись | Экономия, ч/год | За 4 недели при 3 предметах, ч |','|---|---:|---:|---:|']
+    for key,item in data['variants'].items():
+        v=result['variants'][key]
+        lines.append(f'| {key} | {fmt(item["organisation_minutes_after"],1)} | {fmt(v["annual_saved_hours"],1)} | {fmt(v["pilot_saved_hours"],1)} |')
+    lines += ['', 'Для C: 1 920 × (1,5 − 0,5) / 60 = 32 ч/год; 240 × 1 / 60 = 4 ч за четыре недели.','',
+      '| Защит в год | Экономия C, ч/год |','|---:|---:|']
+    lines += [f'| {fmt(row["bookings"],0)} | {fmt(row["saved_hours"],0)} |' for row in result['effect_scenarios']]
+    lines += ['', 'Денежный эффект не оценивается. ROI и срок окупаемости в принятой модели не определяются. Целесообразность обосновывается трудозатратами и улучшением организации приёма. Неизмеренный денежный эффект не подменяется нулём.','']
+    return '\n'.join(lines)
+
+if __name__ == '__main__':
+    data=json.loads((BASE/'assumptions.json').read_text(encoding='utf-8'))
+    result=calculate(data)
     (BASE/'results.md').write_text(render(data,result),encoding='utf-8')
     (BASE/'results.json').write_text(json.dumps(result,ensure_ascii=False,indent=2,default=float)+'\n',encoding='utf-8')
-    print('Saved results.md and results.json')
+    print('Updated results.md and results.json')
