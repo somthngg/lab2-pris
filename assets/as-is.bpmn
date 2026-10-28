@@ -1,104 +1,105 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Defs_as-is" targetNamespace="https://example.org/consultation-concept">
-  <bpmn:process id="Process_as-is" name="AS-IS: очередь на месте консультации" isExecutable="false">
+  <bpmn:process id="Process_as-is" name="AS-IS: запись через общую таблицу" isExecutable="false">
     <bpmn:laneSet id="LaneSet_as-is">
-      <bpmn:lane id="Lane_as-is_student" name="Студент">
-        <bpmn:flowNodeRef>a_start</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>a_queue</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>a_wait</bpmn:flowNodeRef>
-      </bpmn:lane>
       <bpmn:lane id="Lane_as-is_teacher" name="Преподаватель">
-        <bpmn:flowNodeRef>a_receive</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>a_record</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_start</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_publish</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_check</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>a_defend</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>a_end</bpmn:flowNodeRef>
       </bpmn:lane>
+      <bpmn:lane id="Lane_as-is_student" name="Студент">
+        <bpmn:flowNodeRef>a_fill</bpmn:flowNodeRef>
+      </bpmn:lane>
     </bpmn:laneSet>
-    <bpmn:startEvent id="a_start" name="Пришёл на консультацию">
+    <bpmn:startEvent id="a_start" name="Назначен приём">
       <bpmn:outgoing>af1</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:userTask id="a_queue" name="Занять очередь">
+    <bpmn:userTask id="a_publish" name="Разместить таблицу">
       <bpmn:incoming>af1</bpmn:incoming>
       <bpmn:outgoing>af2</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="a_wait" name="Ожидать приёма">
+    <bpmn:userTask id="a_fill" name="Вписать себя и работу">
       <bpmn:incoming>af2</bpmn:incoming>
       <bpmn:outgoing>af3</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="a_receive" name="Принять студента">
+    <bpmn:userTask id="a_check" name="Проверить список">
       <bpmn:incoming>af3</bpmn:incoming>
       <bpmn:outgoing>af4</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:userTask id="a_record" name="Записать результат">
+    <bpmn:userTask id="a_defend" name="Принять защиту">
       <bpmn:incoming>af4</bpmn:incoming>
       <bpmn:outgoing>af5</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:endEvent id="a_end" name="Приём завершён">
+    <bpmn:endEvent id="a_end" name="Результат записан">
       <bpmn:incoming>af5</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="af1" sourceRef="a_start" targetRef="a_queue"/>
-    <bpmn:sequenceFlow id="af2" sourceRef="a_queue" targetRef="a_wait"/>
-    <bpmn:sequenceFlow id="af3" sourceRef="a_wait" targetRef="a_receive"/>
-    <bpmn:sequenceFlow id="af4" sourceRef="a_receive" targetRef="a_record"/>
-    <bpmn:sequenceFlow id="af5" sourceRef="a_record" targetRef="a_end"/>
+    <bpmn:sequenceFlow id="af1" sourceRef="a_start" targetRef="a_publish"/>
+    <bpmn:sequenceFlow id="af2" sourceRef="a_publish" targetRef="a_fill"/>
+    <bpmn:sequenceFlow id="af3" sourceRef="a_fill" targetRef="a_check"/>
+    <bpmn:sequenceFlow id="af4" sourceRef="a_check" targetRef="a_defend"/>
+    <bpmn:sequenceFlow id="af5" sourceRef="a_defend" targetRef="a_end"/>
   </bpmn:process>
   <bpmn:collaboration id="Collab_as-is">
-    <bpmn:participant id="Pool_as-is" name="AS-IS: очередь на месте консультации" processRef="Process_as-is"/>
+    <bpmn:participant id="Pool_as-is" name="AS-IS: запись через общую таблицу" processRef="Process_as-is"/>
   </bpmn:collaboration>
   <bpmndi:BPMNDiagram id="Diagram_as-is">
     <bpmndi:BPMNPlane id="Plane_as-is" bpmnElement="Collab_as-is">
       <bpmndi:BPMNShape id="Pool_as-is_di" bpmnElement="Pool_as-is" isHorizontal="true">
-        <dc:Bounds x="30" y="80" width="1160" height="460"/>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Lane_as-is_student_di" bpmnElement="Lane_as-is_student" isHorizontal="true">
-        <dc:Bounds x="60" y="80" width="1130" height="230"/>
+        <dc:Bounds x="30" y="80" width="1240" height="470"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Lane_as-is_teacher_di" bpmnElement="Lane_as-is_teacher" isHorizontal="true">
-        <dc:Bounds x="60" y="310" width="1130" height="230"/>
+        <dc:Bounds x="60" y="80" width="1210" height="240"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_as-is_student_di" bpmnElement="Lane_as-is_student" isHorizontal="true">
+        <dc:Bounds x="60" y="320" width="1210" height="230"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="a_start_di" bpmnElement="a_start">
-        <dc:Bounds x="110" y="155" width="36" height="36"/>
+        <dc:Bounds x="110" y="160" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="100" y="199" width="100" height="55"/>
+          <dc:Bounds x="100" y="204" width="100" height="55"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="a_queue_di" bpmnElement="a_queue">
-        <dc:Bounds x="210" y="135" width="130" height="96"/>
+      <bpmndi:BPMNShape id="a_publish_di" bpmnElement="a_publish">
+        <dc:Bounds x="220" y="135" width="150" height="96"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="a_wait_di" bpmnElement="a_wait">
-        <dc:Bounds x="410" y="135" width="130" height="96"/>
+      <bpmndi:BPMNShape id="a_fill_di" bpmnElement="a_fill">
+        <dc:Bounds x="440" y="380" width="150" height="96"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="a_receive_di" bpmnElement="a_receive">
-        <dc:Bounds x="610" y="365" width="130" height="96"/>
+      <bpmndi:BPMNShape id="a_check_di" bpmnElement="a_check">
+        <dc:Bounds x="660" y="135" width="150" height="96"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="a_record_di" bpmnElement="a_record">
-        <dc:Bounds x="810" y="365" width="130" height="96"/>
+      <bpmndi:BPMNShape id="a_defend_di" bpmnElement="a_defend">
+        <dc:Bounds x="880" y="135" width="150" height="96"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="a_end_di" bpmnElement="a_end">
-        <dc:Bounds x="1030" y="383" width="36" height="36"/>
+        <dc:Bounds x="1110" y="165" width="36" height="36"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="988.0" y="427" width="120" height="55"/>
+          <dc:Bounds x="1068.0" y="209" width="120" height="55"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="af1_di" bpmnElement="af1">
-        <di:waypoint x="146" y="173"/>
-        <di:waypoint x="210" y="173"/>
+        <di:waypoint x="146" y="178"/>
+        <di:waypoint x="220" y="178"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="af2_di" bpmnElement="af2">
-        <di:waypoint x="340" y="173"/>
-        <di:waypoint x="410" y="173"/>
+        <di:waypoint x="295" y="231"/>
+        <di:waypoint x="295" y="428"/>
+        <di:waypoint x="440" y="428"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="af3_di" bpmnElement="af3">
-        <di:waypoint x="475" y="231"/>
-        <di:waypoint x="475" y="401"/>
-        <di:waypoint x="610" y="401"/>
+        <di:waypoint x="590" y="428"/>
+        <di:waypoint x="735" y="428"/>
+        <di:waypoint x="735" y="231"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="af4_di" bpmnElement="af4">
-        <di:waypoint x="740" y="401"/>
-        <di:waypoint x="810" y="401"/>
+        <di:waypoint x="810" y="183"/>
+        <di:waypoint x="880" y="183"/>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="af5_di" bpmnElement="af5">
-        <di:waypoint x="940" y="401"/>
-        <di:waypoint x="1030" y="401"/>
+        <di:waypoint x="1030" y="183"/>
+        <di:waypoint x="1110" y="183"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
